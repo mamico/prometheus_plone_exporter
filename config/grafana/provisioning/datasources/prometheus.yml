@@ -1,0 +1,22 @@
+# https://github.com/grafana/grafana/blob/master/conf/provisioning/datasources/sample.yaml
+
+apiVersion: 1
+
+deleteDatasources:
+  - name: Prometheus
+    orgId: 1
+
+datasources:
+- name: Prometheus
+  type: prometheus
+  isDefault: true
+  access: proxy
+  orgId: 1
+  url: http://prometheus:9090
+  # basicAuth: true
+  # basicAuthUser: admin
+  # basicAuthPassword: foobar
+  version: 1
+  # <bool> allow users to edit datasources from the UI.
+  editable: true
+  # editable: false

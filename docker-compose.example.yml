@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  prometheus:
+    image: prom/prometheus
+    restart: always
+    environment:
+      # STORAGE_RETENTION: "--storage.tsdb.retention.time=30d"
+      # STORAGE_RETENTION: "--storage.tsdb.retention.size=10GB"
+    volumes:
+      - ./config/prometheus:/etc/prometheus
+      - prometheus-data:/prometheus
+    ports:
+      - 9090:9090
+    depends_on:
+      - pushgateway
+
+  # XXX: a regime pushgateway potrebbe non servire
+  pushgateway:
+    image: prom/pushgateway
+    ports:
+      - 9091:9091
+
+  grafana:
+    image: grafana/grafana:7.5.2-ubuntu
+    environment:
+      # GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_INSTALL_PLUGINS: "grafana-clock-panel,grafana-simple-json-datasource"
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+    restart: always
+    ports:
+      - 3000:3000
+    depends_on:
+      - prometheus
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./config/grafana/provisioning/:/etc/grafana/provisioning/
+      - ./config/grafana/dashboards/:/etc/grafana/dashboards/
+volumes:
+  prometheus-data:
+  grafana-data:
