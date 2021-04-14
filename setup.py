@@ -1,9 +1,6 @@
 """
-plone_exporter
+prometheus_plone_exporter
 ----------------------
-
-An Apache Traffic Server metrics exporter for Prometheus.  Uses the
-stats_over_http plugin to translate JSON data into Prometheus format.
 
 """
 
@@ -11,15 +8,14 @@ from setuptools import find_packages
 from setuptools import setup
 
 setup(
-    name='plone_exporter',
-    version='0.4.0',
+    name='plone_push_gateway_exporter',
+    version='0.0.1',
     author='Mauro Amico',
-    description='Traffic Server metrics exporter for Prometheus',
+    description='Plone buildout metrics exporter for Prometheus',
     long_description=__doc__,
     license='Apache Software License 2.0',
     keywords='prometheus monitoring plone installation',
     test_suite='tests',
-    packages=['plone_push_gateway_exporter'],
     packages=find_packages('src'),
     package_dir={'': 'src'},
     entry_points={
