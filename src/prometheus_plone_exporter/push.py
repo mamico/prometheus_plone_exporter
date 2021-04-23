@@ -1,4 +1,5 @@
 # push data to pushgateway
+import json
 import re
 import subprocess
 import click
@@ -121,6 +122,28 @@ process_num_threads{{process="{name}"}} {proc.num_threads()}
                             if d:
                                 data += d
                                 has_data = True
+                elif item.get('type') == 'pm2':
+                    cmd = item.get('cmd', 'pm2')
+                    try:
+                        programs = json.loads(subprocess.check_output([cmd, "jlist"]))
+                    except:
+                        LOG.exception('%s jlist error', cmd)
+                        continue
+                    for p in programs:  
+                        # SKIP comune.imola.voltotheme
+                        # SKIP cciaa_umbria_volto
+                        if p['name'] == "comune.imola.voltotheme" and buildout == 'comune.imola':
+                            name = 'volto'
+                        elif p['name'] == "cciaa_umbria_volto" and buildout == 'cciaa.umbria':
+                            name = 'volto'
+                        elif p['name'].split('-')[0] != buildout:
+                            continue
+                        else:
+                            name = p['name'].split('-', 1)[1]
+                        d = get_data(p['pid'], name)
+                        if d:
+                            data += d
+                            has_data = True
                 else:
                     pidfile = item['pidfile']
                     name = item['process']
