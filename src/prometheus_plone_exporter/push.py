@@ -109,7 +109,7 @@ process_num_threads{{process="{name}"}} {proc.num_threads()}
                     for line in programs:
                         # haproxy                          RUNNING    pid 32594, uptime 2 days, 1:25:38
                         line = line.decode('UTF-8')
-                        match = re.match(r'^(?P<name>\w).*RUNNING\s+pid\s+(?P<pid>[\d]+)', line)
+                        match = re.match(r'^(?P<name>[\w\.]+)\s*RUNNING\s+pid\s+(?P<pid>[\d]+)', line)
                         if match:
                             name = match.group('name')
                             pid = match.group('pid')
