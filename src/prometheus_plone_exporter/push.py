@@ -55,17 +55,48 @@ def main(pushgateway, every, verbose, config_yml):
         cpu = proc.cpu_times()
         io = proc.io_counters()
         cpu_perc = proc.cpu_percent()  # interval=0.2)
+
+        process_cpu_seconds_total = cpu.user + cpu.system
+        process_cpu_percentage = cpu_perc
+        process_virtual_memory_bytes = mem.vms
+        process_resident_memory_bytes = mem.rss
+        process_open_fds = proc.num_fds()
+        process_io_read_count = io.read_count
+        process_io_write_count = io.write_count
+        process_io_read_bytes = io.read_bytes
+        process_io_write_bytes = io.write_bytes
+        process_num_threads = proc.num_threads()
+
+        # ....
+        # for children in proc.children(recursive=False):
+        #     if children.ppid() not in procs:
+        #         procs[children.ppid()] = children
+        #     proc = procs[children.ppid()]
+        #     mem = proc.memory_info()
+        #     cpu = proc.cpu_times()
+        #     io = proc.io_counters()
+        #     cpu_perc = proc.cpu_percent()  # interval=0.2)
+        #     process_cpu_seconds_total += cpu.user + cpu.system
+        #     process_cpu_percentage += cpu_perc
+        #     process_virtual_memory_bytes += mem.vms
+        #     process_resident_memory_bytes += mem.rss
+        #     process_open_fds += proc.num_fds()
+        #     process_io_read_count += io.read_count
+        #     process_io_write_count += io.write_count
+        #     process_io_read_bytes += io.read_bytes
+        #     process_io_write_bytes += io.write_bytes
+        #     process_num_threads += proc.num_threads()
         return f'''
-process_cpu_seconds_total{{process="{name}"}} {cpu.user + cpu.system}
-process_cpu_percentage{{process="{name}"}} {cpu_perc}
-process_virtual_memory_bytes{{process="{name}"}} {mem.vms}
-process_resident_memory_bytes{{process="{name}"}} {mem.rss}
-process_open_fds{{process="{name}"}} {proc.num_fds()}
-process_io_read_count{{process="{name}"}} {io.read_count}
-process_io_write_count{{process="{name}"}} {io.write_count}
-process_io_read_bytes{{process="{name}"}} {io.read_bytes}
-process_io_write_bytes{{process="{name}"}} {io.write_bytes}
-process_num_threads{{process="{name}"}} {proc.num_threads()}
+process_cpu_seconds_total{{process="{name}"}} {process_cpu_seconds_total}
+process_cpu_percentage{{process="{name}"}} {process_cpu_percentage}
+process_virtual_memory_bytes{{process="{name}"}} {process_virtual_memory_bytes}
+process_resident_memory_bytes{{process="{name}"}} {process_resident_memory_bytes}
+process_open_fds{{process="{name}"}} {process_open_fds}
+process_io_read_count{{process="{name}"}} {process_io_read_count}
+process_io_write_count{{process="{name}"}} {process_io_write_count}
+process_io_read_bytes{{process="{name}"}} {process_io_read_bytes}
+process_io_write_bytes{{process="{name}"}} {process_io_write_bytes}
+process_num_threads{{process="{name}"}} {process_num_threads}
 '''
 
     while True:
