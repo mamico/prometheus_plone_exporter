@@ -127,12 +127,23 @@ process_num_threads{{process="{name}"}} {process_num_threads}
 # TYPE process_io_write_bytes counter
 # HELP process_num_threads The number of threads currently used by this process.
 # TYPE process_num_threads gauge
+# HELP disk_usage Disk usage
+# TYPE disk_usage gauge
 '''
             if not config[buildout]:
                 LOG.warning('no process defined for %s', buildout)
                 continue
             for item in config[buildout]:
-                if item.get('type') == 'supervisor':
+                if item.get('type') == 'du':
+                    disk_usage = 0
+                    for path in item.get('paths') or []:
+                        # TODO: cache
+                        # if os.path.exist(.... '.du.cache' ....
+                        disk_usage += int(subprocess.check_output(['du', '-sb', path]).decode('UTF-8').split()[0])
+                    if disk_usage:
+                        data += 'disk_usage {disk_usage}\n'.format(disk_usage=disk_usage)
+                        has_data = True
+                elif item.get('type') == 'supervisor':
                     try:
                         programs = subprocess.check_output([item['cmd'], 'status']).split(b'\n')
                     except:
