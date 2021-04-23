@@ -1,4 +1,6 @@
 # push data to pushgateway
+import re
+import subprocess
 import click
 import requests
 import psutil
@@ -39,6 +41,32 @@ def main(pushgateway, every, verbose, config_yml):
         logging.basicConfig(level=logging.WARNING)
 
     procs = {}
+
+    def get_data(pid, name):
+        if pid not in procs:
+            try:
+                procs[pid] = psutil.Process(pid)
+            except psutil.NoSuchProcess:
+                LOG.warning('no process for pid %s %s', pid, name)
+                return
+        proc = procs[pid]
+        mem = proc.memory_info()
+        cpu = proc.cpu_times()
+        io = proc.io_counters()
+        cpu_perc = proc.cpu_percent()  # interval=0.2)
+        return f'''
+process_cpu_seconds_total{{process="{name}"}} {cpu.user + cpu.system}
+process_cpu_percentage{{process="{name}"}} {cpu_perc}
+process_virtual_memory_bytes{{process="{name}"}} {mem.vms}
+process_resident_memory_bytes{{process="{name}"}} {mem.rss}
+process_open_fds{{process="{name}"}} {proc.num_fds()}
+process_io_read_count{{process="{name}"}} {io.read_count}
+process_io_write_count{{process="{name}"}} {io.write_count}
+process_io_read_bytes{{process="{name}"}} {io.read_bytes}
+process_io_write_bytes{{process="{name}"}} {io.write_bytes}
+process_num_threads{{process="{name}"}} {proc.num_threads()}
+'''
+
     while True:
         for buildout in config:
             has_data = False
@@ -68,37 +96,41 @@ def main(pushgateway, every, verbose, config_yml):
 # HELP process_num_threads The number of threads currently used by this process.
 # TYPE process_num_threads gauge
 '''
+            if not config[buildout]:
+                LOG.warning('no process defined for %s', buildout)
+                continue
             for item in config[buildout]:
-                pidfile = item['pidfile']
-                process = item['process']
-                pid = get_ts_pid(pidfile)
-                if not pid:
-                    continue
-                if pid not in procs:
+                if item.get('type') == 'supervisor':
                     try:
-                        procs[pid] = psutil.Process(pid)
-                    except psutil.NoSuchProcess:
-                        LOG.warning('no process for pid %s %s', pidfile, process)
+                        programs = subprocess.check_output([item['cmd'], 'status']).split(b'\n')
+                    except:
+                        LOG.exception('%s status error', item.get('cmd'))
                         continue
-                proc = procs[pid]
-                mem = proc.memory_info()
-                cpu = proc.cpu_times()
-                io = proc.io_counters()
-                cpu_perc = proc.cpu_percent()  # interval=0.2)
-                data += f'''
-process_cpu_seconds_total{{process="{process}"}} {cpu.user + cpu.system}
-process_cpu_percentage{{process="{process}"}} {cpu_perc}
-process_virtual_memory_bytes{{process="{process}"}} {mem.vms}
-process_resident_memory_bytes{{process="{process}"}} {mem.rss}
-process_open_fds{{process="{process}"}} {proc.num_fds()}
-process_io_read_count{{process="{process}"}} {io.read_count}
-process_io_write_count{{process="{process}"}} {io.write_count}
-process_io_read_bytes{{process="{process}"}} {io.read_bytes}
-process_io_write_bytes{{process="{process}"}} {io.write_bytes}
-process_num_threads{{process="{process}"}} {proc.num_threads()}
-'''
-
-                has_data = True
+                    for line in programs:
+                        # haproxy                          RUNNING    pid 32594, uptime 2 days, 1:25:38
+                        line = line.decode('UTF-8')
+                        match = re.match(r'^(?P<name>\w).*RUNNING\s+pid\s+(?P<pid>[\d]+)', line)
+                        if match:
+                            name = match.group('name')
+                            pid = match.group('pid')
+                            if not pid or not pid.isdigit():
+                                LOG.waring('missing pid in "%s"', line)
+                                continue
+                            pid = int(pid)
+                            d = get_data(pid, name)
+                            if d:
+                                data += d
+                                has_data = True
+                else:
+                    pidfile = item['pidfile']
+                    name = item['process']
+                    pid = get_ts_pid(pidfile)
+                    if not pid:
+                        continue
+                    d = get_data(pid, name)
+                    if d:
+                        data += d
+                        has_data = True
             if has_data:
                 LOG.debug('%s %s',
                     f'{pushgateway}/metrics/job/node/buildout/{buildout}',

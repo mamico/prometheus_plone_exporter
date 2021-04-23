@@ -21,7 +21,7 @@ setup(
     entry_points={
         'console_scripts': [
             # 'plone_exporter=plone_exporter.__main__:main',
-            'plone_push_gateway_exporter=plone_exporter.push:main',
+            'plone_push_gateway_exporter=prometheus_plone_exporter.push:main',
         ],
     },
     package_data={
