@@ -9,6 +9,7 @@ import yaml
 import logging
 import time
 from .utils import get_ts_pid
+from .cache import Cache
 
 LOG = logging.getLogger(__name__)
 
@@ -137,9 +138,12 @@ process_num_threads{{process="{name}"}} {process_num_threads}
                 if item.get('type') == 'du':
                     disk_usage = 0
                     for path in item.get('paths') or []:
-                        # TODO: cache
-                        # if os.path.exist(.... '.du.cache' ....
-                        disk_usage += int(subprocess.check_output(['du', '-sb', path]).decode('UTF-8').split()[0])
+                        val = Cache.get('du -sb {}'.format(path))
+                        if val is None:
+                            LOG.info('du -sb %s', path)
+                            val = int(subprocess.check_output(['du', '-sb', path]).decode('UTF-8').split()[0])
+                            Cache.set('du -sb {}'.format(path), val, duration=3600)
+                        disk_usage += val
                     if disk_usage:
                         data += 'disk_usage {disk_usage}\n'.format(disk_usage=disk_usage)
                         has_data = True
