@@ -148,6 +148,7 @@ process_num_threads{{process="{name}"}} {process_num_threads}
                         data += 'disk_usage {disk_usage}\n'.format(disk_usage=disk_usage)
                         has_data = True
                 elif item.get('type') == 'supervisor':
+                    LOG.debug('supervisor: %s status', item.get('cmd'))
                     try:
                         programs = subprocess.check_output([item['cmd'], 'status']).split(b'\n')
                     except:
@@ -156,7 +157,7 @@ process_num_threads{{process="{name}"}} {process_num_threads}
                     for line in programs:
                         # haproxy                          RUNNING    pid 32594, uptime 2 days, 1:25:38
                         line = line.decode('UTF-8')
-                        match = re.match(r'^(?P<name>[\w\.]+)\s*RUNNING\s+pid\s+(?P<pid>[\d]+)', line)
+                        match = re.match(r'^(?P<name>[\w\.\-]+)\s*RUNNING\s+pid\s+(?P<pid>[\d]+)', line)
                         if match:
                             name = match.group('name')
                             pid = match.group('pid')
@@ -168,6 +169,8 @@ process_num_threads{{process="{name}"}} {process_num_threads}
                             if d:
                                 data += d
                                 has_data = True
+                        else:
+                            LOG.warning('invalid supervisor line %s', line)
                 elif item.get('type') == 'pm2':
                     cmd = item.get('cmd', 'pm2')
                     try:
