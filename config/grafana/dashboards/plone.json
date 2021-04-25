@@ -15,10 +15,10 @@
   "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
-  "iteration": 1617777832840,
+  "iteration": 1617820583014,
   "links": [],
   "panels": [
-    {
+{
       "datasource": null,
       "description": "",
       "fieldConfig": {
@@ -26,6 +26,7 @@
           "color": {
             "mode": "thresholds"
           },
+          "custom": {},
           "mappings": [],
           "thresholds": {
             "mode": "absolute",
@@ -49,12 +50,24 @@
                 "value": "bytes"
               }
             ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Disk Usage"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "bytes"
+              }
+            ]
           }
         ]
       },
       "gridPos": {
         "h": 4,
-        "w": 3,
+        "w": 5,
         "x": 0,
         "y": 0
       },
@@ -74,7 +87,7 @@
         "text": {},
         "textMode": "auto"
       },
-      "pluginVersion": "7.5.2",
+      "pluginVersion": "7.0.0",
       "targets": [
         {
           "exemplar": false,
@@ -112,18 +125,26 @@
           "interval": "",
           "legendFormat": "IO ops",
           "refId": "D"
+        },
+        {
+          "expr": "sum(disk_usage{buildout=\"$buildout\"})",
+          "instant": true,
+          "interval": "",
+          "legendFormat": "Disk Usage",
+          "refId": "E"
         }
       ],
       "title": "7 days budget",
       "type": "stat"
     },
-    {
+{
       "datasource": null,
       "fieldConfig": {
         "defaults": {
           "color": {
             "mode": "thresholds"
           },
+          "custom": {},
           "mappings": [],
           "max": 2500000000,
           "min": 0,
@@ -151,7 +172,7 @@
       "gridPos": {
         "h": 4,
         "w": 4,
-        "x": 3,
+        "x": 5,
         "y": 0
       },
       "id": 17,
@@ -168,7 +189,7 @@
         "showThresholdMarkers": true,
         "text": {}
       },
-      "pluginVersion": "7.5.2",
+      "pluginVersion": "7.0.0",
       "targets": [
         {
           "exemplar": false,
@@ -199,6 +220,7 @@
           "color": {
             "mode": "thresholds"
           },
+          "custom": {},
           "mappings": [],
           "thresholds": {
             "mode": "absolute",
@@ -220,11 +242,12 @@
       "gridPos": {
         "h": 4,
         "w": 3,
-        "x": 7,
+        "x": 9,
         "y": 0
       },
       "id": 4,
       "options": {
+        "orientation": "auto",
         "reduceOptions": {
           "calcs": [
             "lastNotNull"
@@ -236,7 +259,7 @@
         "showThresholdMarkers": true,
         "text": {}
       },
-      "pluginVersion": "7.5.2",
+      "pluginVersion": "7.0.0",
       "targets": [
         {
           "exemplar": false,
@@ -294,7 +317,7 @@
         "showUnfilled": true,
         "text": {}
       },
-      "pluginVersion": "7.5.2",
+      "pluginVersion": "7.5.3",
       "targets": [
         {
           "exemplar": false,
@@ -374,7 +397,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "7.5.2",
+      "pluginVersion": "7.5.3",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -452,6 +475,116 @@
         "alignLevel": null
       }
     },
+{
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": null,
+      "fieldConfig": {
+        "defaults": {
+          "custom": {},
+          "unit": "bytes"
+        },
+        "overrides": []
+      },
+      "fill": 1,
+      "fillGradient": 0,
+      "gridPos": {
+        "h": 5,
+        "w": 24,
+        "x": 0,
+        "y": 9
+      },
+      "hiddenSeries": false,
+      "id": 19,
+      "legend": {
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "show": true,
+        "total": false,
+        "values": false
+      },
+      "lines": true,
+      "linewidth": 1,
+      "nullPointMode": "null",
+      "options": {
+        "alertThreshold": true,
+        "dataLinks": []
+      },
+      "percentage": false,
+      "pluginVersion": "7.5.3",
+      "pointradius": 2,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [
+        {
+          "$$hashKey": "object:932",
+          "alias": "/average/",
+          "color": "#1250B0",
+          "dashes": true,
+          "stack": false
+        }
+      ],
+      "spaceLength": 10,
+      "stack": true,
+      "steppedLine": false,
+      "targets": [
+        {
+          "exemplar": false,
+          "expr": "sum(disk_usage{buildout=\"$buildout\"})",
+          "instant": false,
+          "interval": "",
+          "intervalFactor": 5,
+          "legendFormat": "{{process}}",
+          "refId": "A"
+        }
+      ],
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "title": "Disk Usage",
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "$$hashKey": "object:865",
+          "format": "bytes",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        },
+        {
+          "$$hashKey": "object:866",
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
     {
       "aliasColors": {},
       "bars": false,
@@ -490,7 +623,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "7.5.2",
+      "pluginVersion": "7.5.3",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -614,7 +747,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "7.5.2",
+      "pluginVersion": "7.5.3",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -714,7 +847,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "7.5.2",
+      "pluginVersion": "7.5.3",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -821,7 +954,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "7.5.2",
+      "pluginVersion": "7.5.3",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -896,52 +1029,28 @@
   "tags": [],
   "templating": {
     "list": [
-      {
-        "allValue": null,
-        "current": {
-          "selected": true,
-          "text": "firefox",
-          "value": "firefox"
-        },
-        "datasource": null,
-        "definition": "label_values(process_virtual_memory_bytes, buildout)",
-        "description": null,
-        "error": null,
-        "hide": 0,
-        "includeAll": false,
-        "label": null,
-        "multi": false,
-        "name": "buildout",
-        "options": [
-          {
-            "selected": true,
-            "text": "firefox",
-            "value": "firefox"
-          },
-          {
-            "selected": false,
-            "text": "portale",
-            "value": "portale"
-          },
-          {
-            "selected": false,
-            "text": "test",
-            "value": "test"
-          }
-        ],
-        "query": {
-          "query": "label_values(process_virtual_memory_bytes, buildout)",
-          "refId": "StandardVariableQuery"
-        },
-        "refresh": 0,
-        "regex": "",
-        "skipUrlSync": false,
-        "sort": 0,
-        "tagValuesQuery": "",
-        "tags": [],
-        "tagsQuery": "",
-        "type": "query",
-        "useTags": false
+        { 
+          "allValue": null,
+          "datasource": "Prometheus",
+          "definition": "",
+          "description": null,
+          "error": null,
+          "hide": 0,
+          "includeAll": false,
+          "label": null,
+          "multi": false,
+          "name": "buildout",
+          "options": [],
+          "query": "label_values(process_cpu_percentage, buildout)",
+          "refresh": 2,
+          "regex": "",
+          "skipUrlSync": false,
+          "sort": 0,
+          "tagValuesQuery": "",
+          "tags": [],
+          "tagsQuery": "",
+          "type": "query",
+          "useTags": false
       }
     ]
   },
@@ -953,5 +1062,5 @@
   "timezone": "",
   "title": "Plone",
   "uid": "vCB6Kc_Mz",
-  "version": 10
+  "version": 1
 }
