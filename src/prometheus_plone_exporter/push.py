@@ -137,12 +137,17 @@ process_num_threads{{process="{name}"}} {process_num_threads}
             for item in config[buildout]:
                 if item.get('type') == 'du':
                     disk_usage = 0
-                    for path in item.get('paths') or []:
-                        val = Cache.get('du -sb {}'.format(path))
+                    paths = item.get('paths')
+                    if paths:
+                        val = Cache.get('du -sb {}'.format(' '.join(paths)))
                         if val is None:
-                            LOG.info('du -sb %s', path)
-                            val = int(subprocess.check_output(['du', '-sb', path]).decode('UTF-8').split()[0])
-                            Cache.set('du -sb {}'.format(path), val, duration=3600)
+                            LOG.info('du -sb %s', ' '.join(paths))
+                            # val = int(subprocess.check_output(['du', '-sb'] + paths).decode('UTF-8').split()[0])
+                            val = 0
+                            for line in subprocess.check_output(['du', '-sb'] + paths).decode('UTF-8').split('\n'):
+                                if line:
+                                    val += int(line.split()[0])
+                            Cache.set('du -sb {}'.format(' '.join(paths)), val, duration=3600)
                         disk_usage += val
                     if disk_usage:
                         data += 'disk_usage {disk_usage}\n'.format(disk_usage=disk_usage)
@@ -155,6 +160,8 @@ process_num_threads{{process="{name}"}} {process_num_threads}
                         LOG.exception('%s status error', item.get('cmd'))
                         continue
                     for line in programs:
+                        if not line.strip():
+                            continue
                         # haproxy                          RUNNING    pid 32594, uptime 2 days, 1:25:38
                         line = line.decode('UTF-8')
                         match = re.match(r'^(?P<name>[\w\.\-]+)\s*RUNNING\s+pid\s+(?P<pid>[\d]+)', line)
